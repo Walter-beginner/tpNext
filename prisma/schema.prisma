@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Empleado {
+  id           Int             @id @default(autoincrement())
+  nombre       String
+  apellido     String
+  legajo       Int             @unique
+  reparticion  String
+  puesto       String?
+  categoriaId  Int
+  nivelAFE     String?         @default("No aplica")
+  fechaAlta    DateTime        @default(now())
+
+  categoria    Categoria       @relation(fields: [categoriaId], references: [id])
+  sueldos      SueldoMensual[]
+}
+
+model Categoria {
+  id           Int     @id @default(autoincrement())
+  numero       Int     @unique
+  sueldoBase   Float
+
+  empleados    Empleado[]
+}
+
+model SueldoMensual {
+  id            Int       @id @default(autoincrement())
+  empleadoId    Int
+  mes           Int
+  anio          Int
+  sueldoBruto   Float
+  descuento     Float
+  sueldoNeto    Float
+  fechaPago     DateTime
+  observaciones String?
+
+  empleado      Empleado  @relation(fields: [empleadoId], references: [id])
+
+  @@unique([empleadoId, mes, anio])
+}
+
